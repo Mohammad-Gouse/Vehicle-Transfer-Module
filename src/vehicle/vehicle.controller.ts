@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Body, Param, UploadedFiles, UseInterceptors } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { Controller, Post, Get, Param, Body, Put, Delete, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import * as multer from 'multer'; // Import multer
 import { VehicleService } from './vehicle.service';
 
 @Controller('vehicles')
@@ -7,11 +8,17 @@ export class VehicleController {
   constructor(private readonly vehicleService: VehicleService) {}
 
   @Post()
-  @UseInterceptors(FilesInterceptor('certificates', 2))
-  create(@Body() createVehicleDto: any, @UploadedFiles() files: any[]) {
-    const pucCertificate = files.find(file => file.fieldname === 'pucCertificate')?.buffer;
-    const insuranceCertificate = files.find(file => file.fieldname === 'insuranceCertificate')?.buffer;
-    const vehicleData = { ...createVehicleDto, pucCertificate, insuranceCertificate };
+  @UseInterceptors(
+    FileInterceptor('pucCertificate')
+  )
+  async create(
+    @Body() createVehicleDto: any,
+    @UploadedFile('pucCertificate') pucFile: Express.Multer.File
+  ) {
+    const vehicleData = {
+      ...createVehicleDto,
+      pucCertificate: pucFile?.buffer
+    };
     return this.vehicleService.create(vehicleData);
   }
 
@@ -20,8 +27,31 @@ export class VehicleController {
     return this.vehicleService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.vehicleService.findOne(id);
+  @Get(':vehicleNumber')
+  findOne(@Param('vehicleNumber') vehicleNumber: string) {
+    return this.vehicleService.findOne(vehicleNumber);
+  }
+
+  @Put(':vehicleNumber')
+  @UseInterceptors(
+    FileInterceptor('pucCertificate', { storage: multer.memoryStorage() }),
+    FileInterceptor('insuranceCertificate', { storage: multer.memoryStorage() })
+  )
+  async update(
+    @Param('vehicleNumber') vehicleNumber: string,
+    @Body() updateVehicleDto: any,
+    @UploadedFile('pucCertificate') pucFile: Express.Multer.File,
+    @UploadedFile('insuranceCertificate') insuranceFile: Express.Multer.File
+  ) {
+    const vehicleData = {
+      ...updateVehicleDto,
+      pucCertificate: pucFile?.buffer
+    };
+    return this.vehicleService.update(vehicleNumber, vehicleData);
+  }
+
+  @Delete(':vehicleNumber')
+  async remove(@Param('vehicleNumber') vehicleNumber: string) {
+    return this.vehicleService.remove(vehicleNumber);
   }
 }

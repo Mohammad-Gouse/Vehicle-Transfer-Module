@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Body, Param, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, UploadedFile, UseInterceptors, Put, Delete } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DriverService } from './driver.service';
-import { Express } from 'express';
 
 @Controller('drivers')
 export class DriverController {
@@ -9,8 +8,14 @@ export class DriverController {
 
   @Post()
   @UseInterceptors(FileInterceptor('profilePhoto'))
-  create(@Body() createDriverDto: any, @UploadedFile() file: any) {
-    const driverData = { ...createDriverDto, profilePhoto: file?.buffer };
+  async create(
+    @Body() createDriverDto: any,
+    @UploadedFile() file:any
+  ) {
+    const driverData = {
+      ...createDriverDto,
+      profilePhoto: file?.buffer,
+    };
     return this.driverService.create(driverData);
   }
 
@@ -22,5 +27,38 @@ export class DriverController {
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.driverService.findOne(id);
+  }
+
+  // @Put(':id')
+  // @UseInterceptors(FileInterceptor('profilePhoto'))
+  // async update(
+  //   @Param('id') id: number,
+  //   @Body() updateDriverDto: any,
+  //   @UploadedFile() file: any
+  // ) {
+  //   const driverData = {
+  //     ...updateDriverDto,
+  //     profilePhoto: file?.buffer,
+  //   };
+  //   return this.driverService.update(id, driverData);
+  // }
+
+  @Put(':id')
+  @UseInterceptors(FileInterceptor('profilePhoto'))
+  async update(
+    @Param('id') id: number,
+    @Body() updateDriverDto: any,
+    @UploadedFile() file: any
+  ) {
+    const driverData = {
+      ...updateDriverDto,
+      profilePhoto: file?.buffer,
+    };
+    return this.driverService.update(id, driverData);
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: number) {
+    return this.driverService.remove(id);
   }
 }
