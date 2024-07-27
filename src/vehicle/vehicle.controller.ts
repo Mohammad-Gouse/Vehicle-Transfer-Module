@@ -1,7 +1,8 @@
-import { Controller, Post, Get, Param, Body, Put, Delete, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Put, Delete, UploadedFiles, UseInterceptors, Query } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import * as multer from 'multer';
 import { VehicleService } from './vehicle.service';
+import { VehicleDto } from './vehicle.dto';
 
 type MulterFile = Express.Multer.File;
 
@@ -15,7 +16,7 @@ export class VehicleController {
     { name: 'insuranceCertificate', maxCount: 1 },
   ], { storage: multer.memoryStorage() }))
   async create(
-    @Body() createVehicleDto: any,
+    @Body() createVehicleDto: VehicleDto,
     @UploadedFiles() files: { pucCertificate?: MulterFile[], insuranceCertificate?: MulterFile[] }
   ) {
     const vehicleData = {
@@ -26,13 +27,24 @@ export class VehicleController {
     return this.vehicleService.create(vehicleData);
   }
 
+  // @Get()
+  // findAll() {
+  //   return this.vehicleService.findAll();
+  // }
+
   @Get()
-  findAll() {
-    return this.vehicleService.findAll();
+  async findAll(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+    @Query('vehicleType') vehicleType?: string,
+    @Query('vehicleNumber') vehicleNumber?: string
+  ) {
+    const filter = { vehicleType, vehicleNumber };
+    return this.vehicleService.findAll(page, limit, filter);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: any) {
+  findOne(@Param('id') id: number) {
     return this.vehicleService.findOne(id);
   }
 
@@ -42,8 +54,8 @@ export class VehicleController {
     { name: 'insuranceCertificate', maxCount: 1 },
   ], { storage: multer.memoryStorage() }))
   async update(
-    @Param('id') id: any,
-    @Body() updateVehicleDto: any,
+    @Param('id') id: number,
+    @Body() updateVehicleDto: VehicleDto,
     @UploadedFiles() files: { pucCertificate?: MulterFile[], insuranceCertificate?: MulterFile[] }
   ) {
     const vehicleData = {
@@ -55,7 +67,7 @@ export class VehicleController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: any) {
+  async remove(@Param('id') id: number) {
     return this.vehicleService.remove(id);
   }
 }

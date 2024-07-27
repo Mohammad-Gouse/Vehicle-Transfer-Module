@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Like, ILike } from 'typeorm';
 import { Driver } from './driver.entity';
+import { DriverDto } from './driver.dto';
 
 @Injectable()
 export class DriverService {
@@ -10,13 +11,30 @@ export class DriverService {
     private driverRepository: Repository<Driver>,
   ) {}
 
-  async create(driverData: any): Promise<Driver[]> {
+  async create(driverData: DriverDto): Promise<Driver> {
     const driver = this.driverRepository.create(driverData);
     return this.driverRepository.save(driver);
   }
 
-  async findAll(): Promise<Driver[]> {
-    return this.driverRepository.find();
+  // async findAll(): Promise<Driver[]> {
+  //   return this.driverRepository.find();
+  // }
+
+  async findAll(
+    page: number = 1,
+    limit: number = 10,
+    filter?: { name?: string; phoneNumber?: string }
+  ): Promise<{ data: Driver[]; total: number }> {
+    const [data, total] = await this.driverRepository.findAndCount({
+      where: {
+        name: filter?.name ? ILike(`%${filter.name}%`) : undefined,
+        phoneNumber: filter?.phoneNumber ? ILike(`%${filter.phoneNumber}%`) : undefined,
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return { data, total };
   }
 
   async findOne(id: number): Promise<Driver> {
@@ -27,33 +45,17 @@ export class DriverService {
     return driver;
   }
 
-  // async update(id: number, updateDriverDto: any): Promise<Driver> {
-  //   console.log(updateDriverDto)
-  //   const driver = await this.driverRepository.preload({
-  //     id,
-  //     ...updateDriverDto,
-  //   });
 
-  //   console.log(driver, id)
 
-  //   if (!driver) {
-  //     throw new NotFoundException(`Driver with ID ${id} not found`);
-  //   }
-
-  //   return this.driverRepository.save(driver);
-  // }
-
-  async update(id: number, updateDriverDto: any): Promise<Driver> {
+  async update(id: number, updateDriverDto: DriverDto): Promise<Driver> {
     const existingDriver = await this.driverRepository.findOne({ where: { id } });
 
     if (!existingDriver) {
       throw new NotFoundException(`Driver with ID ${id} not found`);
     }
 
-    // Merge the existing driver with the update data
     const updatedDriver = { ...existingDriver, ...updateDriverDto };
 
-    console.log('Updated Driver Data:', updatedDriver);
 
     return this.driverRepository.save(updatedDriver);
   }

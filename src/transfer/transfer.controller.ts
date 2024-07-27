@@ -1,18 +1,27 @@
-import { Controller, Post, Get, Param, Body } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Query } from '@nestjs/common';
 import { TransferService } from './transfer.service';
+import { TransferDto } from './transfer.dto';
 
 @Controller('transfers')
 export class TransferController {
   constructor(private readonly transferService: TransferService) {}
 
   @Post()
-  async create(@Body() createTransferDto: any) {
+  async create(@Body() createTransferDto: TransferDto) {
     return this.transferService.transferVehicle(createTransferDto);
   }
 
+  // @Get()
+  // findAll() {
+  //   return this.transferService.findAll();
+  // }
+
   @Get()
-  findAll() {
-    return this.transferService.findAll();
+  async findAll(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
+    return this.transferService.findAll(page, limit);
   }
 
   @Get('vehicle/:vehicleNumber')

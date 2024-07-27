@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Transfer } from './transfer.entity';
 import { Driver } from '../driver/driver.entity';
 import { Vehicle } from '../vehicle/vehicle.entity';
+import { TransferDto } from './transfer.dto';
 
 @Injectable()
 export class TransferService {
@@ -16,32 +17,8 @@ export class TransferService {
     private vehicleRepository: Repository<Vehicle>,
   ) {}
 
-  // async transferVehicle(transferData: any): Promise<Transfer> {
-  //   const { vehicleId, fromDriverId, toDriverId, transferDate } = transferData;
 
-  //   if (!vehicleId || !toDriverId || !transferDate) {
-  //     throw new BadRequestException('Missing required transfer data');
-  //   }
-
-  //   const fromDriver = await this.driverRepository.findOne({ where: {id:fromDriverId} });
-  //   const toDriver = await this.driverRepository.findOne({ where:{id:toDriverId} });
-  //   const vehicle = await this.vehicleRepository.findOne({ where:{id:vehicleId} });
-
-  //   if (!fromDriver || !toDriver || !vehicle) {
-  //     throw new Error('Invalid transfer data');
-  //   }
-
-  //   const transfer = this.transferRepository.create({
-  //     fromDriver,
-  //     toDriver,
-  //     vehicle,
-  //     transferDate,
-  //   });
-
-  //   return this.transferRepository.save(transfer);
-  // }
-
-  async transferVehicle(transferData: any): Promise<Transfer> {
+  async transferVehicle(transferData: TransferDto): Promise<Transfer> {
     const { vehicleId, fromDriverId, toDriverId, transferDate } = transferData;
 
     try {
@@ -85,8 +62,21 @@ export class TransferService {
     }
   }
 
-  async findAll(): Promise<Transfer[]> {
-    return this.transferRepository.find({ relations: ['fromDriver', 'toDriver', 'vehicle'] });
+  // async findAll(): Promise<Transfer[]> {
+  //   return this.transferRepository.find({ relations: ['fromDriver', 'toDriver', 'vehicle'] });
+  // }
+
+  async findAll(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ data: Transfer[]; total: number }> {
+    const [data, total] = await this.transferRepository.findAndCount({
+      relations: ['fromDriver', 'toDriver', 'vehicle'],
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return { data, total };
   }
 
   async findByVehicle(vehicleNumber: string): Promise<Transfer[]> {
