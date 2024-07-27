@@ -7,33 +7,44 @@ import { Vehicle } from './vehicle.entity';
 export class VehicleService {
   constructor(
     @InjectRepository(Vehicle)
-    private vehicleRepository: Repository<Vehicle>,
+    private readonly vehicleRepository: Repository<Vehicle>,
   ) {}
 
-  async create(vehicleData: any): Promise<Vehicle[]> {
-    console.log(`serve vehicle ${vehicleData}`)
-    const vehicle = this.vehicleRepository.create(vehicleData);
+  async create(createVehicleDto: any): Promise<Vehicle[]> {
+    const vehicle = this.vehicleRepository.create(createVehicleDto);
     return this.vehicleRepository.save(vehicle);
   }
 
   async findAll(): Promise<Vehicle[]> {
-    console.log(`serve vehicle`)
-    return this.vehicleRepository.find();
+    return this.vehicleRepository.find({ relations: ['transfers'] });
   }
 
-  async findOne(vehicleNumber: string): Promise<Vehicle> {
-    const vehicle = await this.vehicleRepository.findOne({ where: { vehicleNumber } });
+  async findOne(id: number): Promise<Vehicle> {
+    const vehicle = await this.vehicleRepository.findOne({ where: { id }, relations: ['transfers'] });
     if (!vehicle) {
-      throw new NotFoundException(`Vehicle with Number ${vehicleNumber} not found`);
+      throw new NotFoundException(`Vehicle with ID ${id} not found`);
     }
     return vehicle;
   }
 
-  async update(vehicleNumber: string, updateVehicleDto: any): Promise<Vehicle> {
-    const existingVehicle = await this.vehicleRepository.findOne({ where: { vehicleNumber } });
+  // async update1(id: number, updateVehicleDto: any): Promise<Vehicle> {
+  //   const vehicle = await this.vehicleRepository.preload({
+  //     id,
+  //     ...updateVehicleDto,
+  //   });
+
+  //   if (!vehicle) {
+  //     throw new NotFoundException(`Vehicle with ID ${id} not found`);
+  //   }
+
+  //   return this.vehicleRepository.save(vehicle);
+  // }
+
+  async update(id: number, updateVehicleDto: any): Promise<Vehicle> {
+    const existingVehicle = await this.vehicleRepository.findOne({ where: { id } });
 
     if (!existingVehicle) {
-      throw new NotFoundException(`Vehicle with Number ${vehicleNumber} not found`);
+      throw new NotFoundException(`Vehicle with ID ${id} not found`);
     }
 
     const updatedVehicle = { ...existingVehicle, ...updateVehicleDto };
@@ -41,10 +52,8 @@ export class VehicleService {
     return this.vehicleRepository.save(updatedVehicle);
   }
 
-  async remove(vehicleNumber: string): Promise<void> {
-    const result = await this.vehicleRepository.delete(vehicleNumber);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Vehicle with Number ${vehicleNumber} not found`);
-    }
+  async remove(id: number): Promise<void> {
+    const vehicle = await this.findOne(id);
+    await this.vehicleRepository.remove(vehicle);
   }
 }

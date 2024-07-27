@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { Transfer } from 'src/transfer/transfer.entity';
+import { Transfer } from '../transfer/transfer.entity';
 
 @Entity()
 export class Driver {
@@ -15,6 +15,9 @@ export class Driver {
   @Column({ type: 'bytea', nullable: true })
   profilePhoto: Buffer;
 
-  @OneToMany(() => Transfer, (transfer) => transfer.driver)
-  transfers: Transfer[];
+  @OneToMany(() => Transfer, (transfer) => transfer.fromDriver)
+  transfersFrom: Transfer[];
+
+  @OneToMany(() => Transfer, (transfer) => transfer.toDriver)
+  transfersTo: Transfer[];
 }
