@@ -20,10 +20,6 @@ export class DriverController {
     return this.driverService.create(driverData);
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.driverService.findAll();
-  // }
 
   @Get()
   async findAll(

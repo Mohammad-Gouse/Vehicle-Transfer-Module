@@ -74,9 +74,24 @@ export class TransferService {
       relations: ['fromDriver', 'toDriver', 'vehicle'],
       skip: (page - 1) * limit,
       take: limit,
+      order: {
+        updatedAt: 'DESC',
+      },
     });
 
     return { data, total };
+  }
+
+  // async remove(id: number): Promise<void> {
+  //   const vehicle = await this.findOne(id);
+  //   await this.vehicleRepository.remove(vehicle);
+  // }
+
+  async remove(id: number): Promise<void> {
+    const result = await this.transferRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Transer with ID ${id} not found`);
+    }
   }
 
   async findByVehicle(vehicleNumber: string): Promise<Transfer[]> {

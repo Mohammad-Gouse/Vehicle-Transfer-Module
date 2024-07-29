@@ -31,6 +31,7 @@ export class VehicleService {
         vehicleType: filter?.vehicleType ? ILike(`%${filter.vehicleType}%`) : undefined,
         vehicleNumber: filter?.vehicleNumber ? ILike(`%${filter.vehicleNumber}%`) : undefined,
       },
+      order: { updatedAt: 'DESC' },
       skip: (page - 1) * limit,
       take: limit,
     });
@@ -60,7 +61,9 @@ export class VehicleService {
   }
 
   async remove(id: number): Promise<void> {
-    const vehicle = await this.findOne(id);
-    await this.vehicleRepository.remove(vehicle);
+    const result = await this.vehicleRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Vehicle with ID ${id} not found`);
+    }
   }
 }

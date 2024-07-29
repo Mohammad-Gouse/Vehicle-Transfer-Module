@@ -66,6 +66,7 @@ export class VehicleController {
     return this.vehicleService.update(id, vehicleData);
   }
 
+
   @Delete(':id')
   async remove(@Param('id') id: number) {
     return this.vehicleService.remove(id);

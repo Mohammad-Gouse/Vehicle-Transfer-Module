@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, Body, Query } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Query, Delete } from '@nestjs/common';
 import { TransferService } from './transfer.service';
 import { TransferDto } from './transfer.dto';
 
@@ -22,6 +22,17 @@ export class TransferController {
     @Query('limit') limit: number = 10,
   ) {
     return this.transferService.findAll(page, limit);
+  }
+
+  // @Delete(':id')
+  // async remove(@Param('id') id: string): Promise<void> {
+  //   return this.transferService.remove(+id);
+  // }
+
+
+  @Delete(':id')
+  async remove(@Param('id') id: number) {
+    return this.transferService.remove(id);
   }
 
   @Get('vehicle/:vehicleNumber')

@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Driver } from '../driver/driver.entity';
 import { Vehicle } from '../vehicle/vehicle.entity';
 
@@ -18,4 +18,10 @@ export class Transfer {
 
   @Column()
   transferDate: Date;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

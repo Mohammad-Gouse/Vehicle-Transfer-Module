@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Transfer } from 'src/transfer/transfer.entity';
 
 
@@ -21,4 +21,10 @@ export class Vehicle {
 
   @OneToMany(() => Transfer, (transfer) => transfer.vehicle)
   transfers: Transfer[];
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

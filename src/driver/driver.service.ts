@@ -30,6 +30,7 @@ export class DriverService {
         name: filter?.name ? ILike(`%${filter.name}%`) : undefined,
         phoneNumber: filter?.phoneNumber ? ILike(`%${filter.phoneNumber}%`) : undefined,
       },
+      order: { updatedAt: 'DESC' },
       skip: (page - 1) * limit,
       take: limit,
     });
